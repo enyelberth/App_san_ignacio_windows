@@ -13,14 +13,36 @@ using App_San_ignacio_Conection.Configurations;
 using System.Net;
 using App_San_ignacio_Conection.Configurations.Network;
 using System.Text.RegularExpressions;
+using System.Runtime.Remoting.Contexts;
+using System.Net.NetworkInformation;
+using App_San_ignacio_Conection.Configurations.Archive;
+
 
 namespace App_San_ignacio_Conection
 {
     public partial class Form1 : Form
     {
+        static Internet internetForm = null;
+
+        private bool conexionPerdidaMostrada = false; // Controla si la ventana ya está mostrada
+
+        static NoInternet noInternetForm = null;
+        static usbConec usbConecForm = null;
+        static usbDesconec usbDesconecForm = null;
+        //private Timer pingTimer = new Timer();
+
         public Form1()
         {
+     
+            ArchiveClass.
+                CreateDatabase();
+ArchiveClass.InsertarDevice("192.168.1.1", "Router", "Router de la red", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+           ArchiveClass.GetDevice();
+
             InitializeComponent();
+      //      pingTimer.Interval = 1000; // 1 segundo entre pings
+        //    pingTimer.Tick += timer1_Tick;
+
             //this.BackColor = Color.LimeGreen;
             //this.TransparencyKey= Color.LimeGreen;
         }
@@ -123,6 +145,8 @@ namespace App_San_ignacio_Conection
 
         private void listBox1_SelectedIndexChanged_1(object sender, EventArgs e)
         {
+
+
             MessageBox.Show("El dispositivo " + listBox1.SelectedItem.ToString() + " está conectado");
         }
 
@@ -190,9 +214,80 @@ namespace App_San_ignacio_Conection
 
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private async void button3_Click(object sender, EventArgs e)
         {
+            timer1.Start();
             MessageBox.Show("Realizando funcionalidad");
+        }
+        private void WatchIP()
+        {
+            Ping pingSender = new Ping();
+            string ipAddress = "192.168.1.20"; // Cambia por la IP que deseas pinguear
+            int timeout = 1000; // Tiempo de espera en milisegundos
+
+            PingReply reply = pingSender.Send(ipAddress, timeout);
+
+            if (reply.Status == IPStatus.Success)
+            {
+                Console.WriteLine("Dirección: {0}", reply.Address.ToString());
+                Console.WriteLine("Tiempo de respuesta: {0} ms", reply.RoundtripTime);
+                
+            }
+            else
+            {
+                MessageBox.Show("No se pudo alcanzar la dirección IP.");
+                Console.WriteLine("Error: {0}", reply.Status);
+            }
+        }
+
+
+        private async void timer1_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                using (Ping ping = new Ping())
+                {
+                    PingReply reply = await ping.SendPingAsync(textBox1.Text.ToString(), 1000);
+
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        // Si la ventana de no internet está abierta, opcionalmente la cerramos o actualizamos
+                        if (noInternetForm != null && !noInternetForm.IsDisposed)
+                        {
+                            noInternetForm.Close();
+                            noInternetForm = null;
+                        }
+
+                        // Mostrar o actualizar internetForm si lo usas para indicar conexión
+                        if (internetForm != null && !internetForm.IsDisposed)
+                        {
+                            internetForm.Show();
+                            // Aquí podrías actualizar algún estado o texto si quieres
+                        }
+                    }
+                    else
+                    {
+                        MostrarNoInternet($"Sin respuesta ({reply.Status})");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MostrarNoInternet("Error al hacer ping: " + ex.Message);
+            }
+
+        }
+        private void MostrarNoInternet(string mensaje)
+        {
+            if (noInternetForm == null || noInternetForm.IsDisposed)
+            {
+                noInternetForm = new NoInternet();
+                noInternetForm.FormClosed += (s, e) => { noInternetForm = null; };
+                noInternetForm.Show();
+            }
+
+            // Suponiendo que NoInternet tiene un método o control para mostrar mensajes:
+            
         }
     }
 }
