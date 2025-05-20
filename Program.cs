@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -27,20 +28,23 @@ namespace App_San_ignacio_Conection
             // Crear un formulario principal vacío o con interfaz si lo tienes
             ArchiveClass.CreateDatabase();
 
-
+            MostrarNotificacion(new Form1(),"Conexion establecida","el internet se establecio correctamente");
             //ArchiveClass.InsertarDevice("192.168.1.1", "Router", "Router de la red", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             var data  = ArchiveClass.GetUserConfig();
             //  MessageBox.Show(data.ToString());
 
+            Form1 Form1 = new Form1();
+            
             if (1>= data.Count)
             {
-            Form1 Form1 = new Form1();
                 MessageBox.Show("No hay configuracion de usuario");
                 Task.Run(() => Monitorizar(Form1));
             Application.Run(Form1);
             }
             else
             {
+                MessageBox.Show("No hay configuracion de usuario");
+                Task.Run(() => Monitorizar(Form1));
 
                 MessageBox.Show("Configuracion encontrada");
                 //NotifyIcon notifyIcon = new NotifyIcon();
@@ -50,6 +54,9 @@ namespace App_San_ignacio_Conection
                 //notifyIcon.ShowBalloonTip(3000); // Duración en milisegundos
                 //MessageBox.Show("COnfigurea");
             }
+
+
+
                 // Ejecutar el monitoreo en segundo plano para no bloquear la UI
 
             
@@ -61,6 +68,20 @@ namespace App_San_ignacio_Conection
             
 
         }
+        public static void MostrarNotificacion(Form1 form,string name,string description)
+        {
+            NotifyIcon notifyIcon = new NotifyIcon
+            {
+                Icon =  SystemIcons.Warning, // Usa un icono válido
+                //Icon = new Icon(@"public\Farmacia-san-ignacio.ico"),
+                BalloonTipTitle = name,
+                BalloonTipText = description,
+                BalloonTipIcon = ToolTipIcon.Error,
+                Visible = true
+            };
+            notifyIcon.ShowBalloonTip(3000);
+        }
+
         static void Monitorizar(Form mainForm)
         {
             List<string> listaDevice = new List<string>();
