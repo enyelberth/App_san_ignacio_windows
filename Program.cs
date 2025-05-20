@@ -6,14 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using App_San_ignacio_Conection.Configurations;
+using App_San_ignacio_Conection.Configurations.Archive;
 
 namespace App_San_ignacio_Conection
 {
     internal static class Program
     {
-        /// <summary>
-        /// Punto de entrada principal para la aplicación.
-        /// </summary>
+      
         static Internet internetForm = null;
         static NoInternet noInternetForm = null;
         static usbConec usbConecForm = null;
@@ -26,13 +25,34 @@ namespace App_San_ignacio_Conection
             Application.SetCompatibleTextRenderingDefault(false);
 
             // Crear un formulario principal vacío o con interfaz si lo tienes
+            ArchiveClass.CreateDatabase();
+
+
+            //ArchiveClass.InsertarDevice("192.168.1.1", "Router", "Router de la red", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            var data  = ArchiveClass.GetUserConfig();
+            //  MessageBox.Show(data.ToString());
+
+            if (1>= data.Count)
+            {
             Form1 Form1 = new Form1();
-
-            // Ejecutar el monitoreo en segundo plano para no bloquear la UI
-            Task.Run(() => Monitorizar(Form1));
-
+                MessageBox.Show("No hay configuracion de usuario");
+                Task.Run(() => Monitorizar(Form1));
             Application.Run(Form1);
+            }
+            else
+            {
 
+                MessageBox.Show("Configuracion encontrada");
+                //NotifyIcon notifyIcon = new NotifyIcon();
+                //notifyIcon.BalloonTipTitle = "Título de notificación";
+                //notifyIcon.BalloonTipText = "La aplicación está minimizada en la bandeja.";
+                //notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+                //notifyIcon.ShowBalloonTip(3000); // Duración en milisegundos
+                //MessageBox.Show("COnfigurea");
+            }
+                // Ejecutar el monitoreo en segundo plano para no bloquear la UI
+
+            
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
 

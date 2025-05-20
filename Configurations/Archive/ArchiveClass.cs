@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using App_San_ignacio_Conection.Configurations.Network;
 using Microsoft.Data.Sqlite;
 
 namespace App_San_ignacio_Conection.Configurations.Archive
@@ -35,6 +36,16 @@ namespace App_San_ignacio_Conection.Configurations.Archive
 
                 );
             ";
+                createTableCmd.CommandText =
+      @"
+                CREATE TABLE IF NOT EXISTS UserConfig (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    IP TEXT NOT NULL,
+                    Nombre TEXT NOT NULL,
+                    Fecha TEXT NOT NULL
+
+                );
+            ";
                 createTableCmd.ExecuteNonQuery();
 
                 Console.WriteLine("Base de datos y tabla creadas (si no existían).");
@@ -58,7 +69,23 @@ namespace App_San_ignacio_Conection.Configurations.Archive
 
                 int filasInsertadas = insertCmd.ExecuteNonQuery();
 
-                Console.WriteLine($"Insertadas {filasInsertadas} fila(s) con el ip'{ip}'.");
+                //Console.WriteLine($"Insertadas {filasInsertadas} fila(s) con el ip'{ip}'.");
+            }
+        }
+        public static void InsertarConfig(string ip, string nombre, string description, string fecha)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var insertCmd = connection.CreateCommand();
+                insertCmd.CommandText = "INSERT INTO UserConfig (IP,Nombre,Fecha) VALUES (@ip,@nombre,@fecha)";
+                insertCmd.Parameters.AddWithValue("@nombre", nombre);
+                insertCmd.Parameters.AddWithValue("@ip", ip);
+                insertCmd.Parameters.AddWithValue("@fecha", fecha);
+                int filasInsertadas = insertCmd.ExecuteNonQuery();
+
+                //Console.WriteLine($"Insertadas {filasInsertadas} fila(s) con el ip'{ip}'.");
             }
         }
 
@@ -77,7 +104,7 @@ namespace App_San_ignacio_Conection.Configurations.Archive
                     Console.WriteLine("Listado de Devices:");
                     while (reader.Read())
                     {
-                        MessageBox.Show(reader.GetString(3));
+                        //MessageBox.Show(reader.GetString(3));
                         int id = reader.GetInt32(0);
                         string nombre = reader.GetString(1);
                         string ip = reader.GetString(2);
@@ -86,6 +113,40 @@ namespace App_San_ignacio_Conection.Configurations.Archive
                         Console.WriteLine($"Id: {id}, Nombre: {nombre},description:{description},fecha:{fecha}");
                     }
                 }
+            }
+        }
+        public static List<InternetClass> GetUserConfig()
+        {
+            List<InternetClass> data = new List<InternetClass>();
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var selectCmd = connection.CreateCommand();
+                selectCmd.CommandText = "SELECT * FROM UserConfig";
+
+                using (var reader = selectCmd.ExecuteReader())
+                {
+                    Console.WriteLine("Listado de Devices:");
+                    Console.WriteLine(reader);
+                    while (reader.Read())
+                    {
+                        
+                        //MessageBox.Show(reader.GetString(3));
+                        int id = reader.GetInt32(0);
+                        string nombre = reader.GetString(1);
+                        string ip = reader.GetString(2);
+                        string description = reader.GetString(3);
+                        string fecha = reader.GetString(4);
+                        var device = new InternetClass( ip, nombre, description);
+                        data.Add(device);
+                        Console.WriteLine($"Id: {id}, Nombre: {nombre},description:{description},fecha:{fecha}");
+                    
+                    }
+                    return data;
+
+                }
+                   
             }
         }
     }

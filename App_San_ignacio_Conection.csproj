@@ -204,7 +204,7 @@
     <Compile Include="Configurations\Archive\ArchiveClass.cs" />
     <Compile Include="Configurations\ConfiguracionClass.cs" />
     <Compile Include="Configurations\device\DeviceClass.cs" />
-    <Compile Include="Configurations\Network\Internet.cs" />
+    <Compile Include="Configurations\Network\InternetClass.cs" />
     <Compile Include="Configurations\Network\NetworkClass.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
